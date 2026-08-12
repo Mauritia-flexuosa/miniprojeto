@@ -25,3 +25,4 @@ with open('/olist_products_dataset.csv',
 mo.converte_data(dados)
 mo.situacao_data_entrega(dados)
 mo.limpa_texto(dados_prod)
+mo.limpar_dados_faltantes(dados_prod)
