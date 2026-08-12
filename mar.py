@@ -90,4 +90,88 @@ def situacao_data_entrega(dados):
   print('=======================================================================')
 
 
+def limpar_dados_faltantes(dados):
+  print('=============== Dados originais (sem processamento) ===============\n')
+  print('Nome do dataset: olist_products_dataset\n')
+  print(f'Originalmente, os dados possuem {len(dados_prod)} linhas\n')
+  print('========================================\n')
+  print('Quantidade de NAs por variável:\n')
+
+  conta_nas = {}
+  variaveis_para_remover = []
+  dados_limpos = []
+
+  # Conta a quantidade de NAs em cada uma das variáveis
+  for linha in dados:
+    for variavel in linha:
+      if linha[variavel] is None or linha[variavel] == '':
+        conta_nas[variavel] = conta_nas.get(variavel, 0) + 1
+
+  # Esse trechinho só printa
+  for var in conta_nas:
+    if var == 'product_category_name':
+      print(f'product_category_name: {conta_nas[var]} NAs.')
+    else:
+      print(f'{var}: {conta_nas[var]} NAs.')
+  print('\n========================================\n')
+
+  print('Porcentagem de NAs:\n')
+
+  # Calcula a porcentagem de NAs para usar como critério para remoção
+  for var in conta_nas:
+    percentual = conta_nas[var]/len(dados)*100
+    if conta_nas[var] > 0:
+      print(f'{var}: {percentual:.5f}% de NAs.')
+    if conta_nas[var] == 0:
+      print(f'{var}: Não há NAs.')
+    if percentual <= 1: # Inclui variáveis com quantidade de NAs igual ou menor que 1%
+      variaveis_para_remover.append(var) # Inclui essas variáveis em um objeto
+
+  # Inicia a remoção
+  for linha in dados:
+    remover = False
+    # Se a variável estiver na lista para remoção e possuir NA, remove
+    for var in variaveis_para_remover:
+      if linha[var] is None or linha[var] == '':
+        remover = True
+    # Se não estiver na lista, inclui nos dados_limpos
+    if not remover:
+      dados_limpos.append(linha)
+
+  # Preenchimento de valores com NAs ou ausentes
+
+  """
+  Regra imposta para product_category_name: "deve ser preenchido com a string
+  'sem categoria'". Eu estendi esta regra para outras variáveis não numéricas
+  """
+
+  strings_prod = [
+      'product_category_name',
+      'product_name_lenght',
+      'product_description_lenght',
+      'product_photos_qty'
+  ]
+  padrao = r'_(.*?)_' # pega a palavrinha entre os underscores (_)
+
+  for linha in dados_limpos:
+    for var in linha:
+      # Se a variável for string e se estiver nessa lista string_Prod
+      if var in strings_prod and type(var) == str:
+        # E se o valor for nulo ou inexistente
+        if linha[var] is None or linha[var] == '':
+          texto = var
+          variavel = re.findall(padrao, texto)[0] # Eu coloquei o '[0]' porque retorna uma lista e nao uma string
+          # Preencha com sem_ e o texto que eu peguei no meio do nome da variável
+          preenchimento = "sem_" + variavel
+          linha[var] = preenchimento
+
+  print('\n========================================\n')
+  print(f'Número inicial de linhas: {len(dados_prod)} linhas')
+  print('========================================\n')
+  print(f'Foi realizado o preenchimento de {conta_nas['product_category_name']} valores inexistentes.')
+  print(f'\nForam removidas {len(dados_prod)-len(dados_limpos)} linhas após o processamento')
+  print(f'\nNúmero final de linhas: {len(dados_limpos)} linhas')
+  print('\n========================================\n')
+
+
 
