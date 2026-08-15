@@ -235,4 +235,4 @@ Além disso, overfitting ocorre quando o modelo aprende excessivamente os padrõ
 
 ## Autoria
 
-Projeto desenvolvido por *Marcio Baldissera Cure* como atividade avaliativa da etapa profissionalizar da Trilha de Inteligência artificial do Carreira Tech, do Programa SCTEC - SCTI/SESC.
+Projeto desenvolvido por *Marcio Baldissera Cure* como atividade avaliativa da etapa profissionalizar da Trilha de Inteligência artificial do Carreira Tech, do Programa SCTEC - SCTI/SENAI/SC.
