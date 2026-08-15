@@ -501,6 +501,25 @@ entendimento de que, como são menos de 2% dos dados faltantes para esta
 variável, o critério poderia ser facilmente aplicado a variáveis de
 “importância” presumivelmente similares e com o mesmo número de
 ausências.</p>
+<pre class="python"><code>strings_prod = [
+      &#39;product_category_name&#39;,
+      &#39;product_name_lenght&#39;,
+      &#39;product_description_lenght&#39;,
+      &#39;product_photos_qty&#39;
+  ]
+  padrao = r&#39;_(.*?)_&#39; # pega a palavrinha entre os underscores (_)
+
+  for linha in dados_limpos:
+    for var in linha:
+      # Se a variável for string e se estiver nessa lista string_Prod
+      if var in strings_prod and type(var) == str:
+        # E se o valor for nulo ou inexistente
+        if linha[var] is None or linha[var] == &#39;&#39;:
+          texto = var
+          variavel = re.findall(padrao, texto)[0] # Eu coloquei o &#39;[0]&#39; porque retorna uma lista e nao uma string
+          # Preencha com sem_ e o texto que eu peguei no meio do nome da variável
+          preenchimento = &quot;sem_&quot; + variavel
+          linha[var] = preenchimento</code></pre>
 </div>
 <div id="padronização-de-textos-e-regex" class="section level3">
 <h3>2. Padronização de textos e Regex</h3>
@@ -509,6 +528,16 @@ ausências.</p>
 extremidades com <code>.strip()</code>, convertendo o texto para letras
 minúsculas com <code>.lower()</code> e utilizando uma expressão regular
 para remover caracteres não alfanuméricos e underscores.</p>
+<pre class="python"><code>for linha in dados:
+      texto = linha[&#39;product_category_name&#39;]
+      # Verifica se não tem alguma linha sem informaçao
+      if texto is not None:
+          texto = texto.strip().lower() # Remove espaços em braco nas extremidades e transforma tudo para letra minúscula
+      # Removi caracteres não alfa-numéricos e o underscore
+      padrao = r&#39;[^\w\s]+|_&#39;
+      # Substitui os caracteres do &#39;padrao&#39; e substitui por &#39; &#39;
+      texto = re.sub(padrao, &#39; &#39;, texto)
+</code></pre>
 </div>
 <div id="validação-das-datas-de-entrega" class="section level3">
 <h3>3. Validação das datas de entrega</h3>
@@ -521,6 +550,23 @@ como <code>OK</code>, <code>Falta data de entrega</code>,
 <code>Pedido não entregue com data</code>. O objetivo é verificar a
 hipótese de negócio de que pedidos sem data de entrega devem estar
 associados a pedidos que não foram entregues.</p>
+<pre class="python"><code> for linha in dados:
+
+    total_linhas += 1
+    # Cria uma coluna indicando a situação da data de entrega
+    if linha[&#39;order_status&#39;] == &#39;delivered&#39; and linha[&#39;order_delivered_customer_date&#39;] is None:
+      linha[&#39;situacao_data_entrega&#39;] = &#39;Falta data de entrega&#39;
+      print(f&#39;-&gt; Order_id {linha[&#39;order_id&#39;]} com falta de data de entrega!&#39;)
+    if linha[&#39;order_status&#39;] != &#39;delivered&#39; and linha[&#39;order_delivered_customer_date&#39;] is None:
+      linha[&#39;situacao_data_entrega&#39;] = &#39;OK! Sem data porque não foi entregue&#39;
+    elif linha[&#39;order_status&#39;] != &#39;delivered&#39; and linha[&#39;order_delivered_customer_date&#39;] is not None:
+      linha[&#39;situacao_data_entrega&#39;] = &#39;Pedido não entregue com data&#39;
+      print(f&#39;-&gt; Order_id {linha[&#39;order_id&#39;]} com data de entrega mas que não foi entregue!&#39;)
+    elif linha[&#39;order_status&#39;] == &#39;delivered&#39; and linha[&#39;order_delivered_customer_date&#39;] is not None:
+      linha[&#39;situacao_data_entrega&#39;] = &#39;OK&#39;
+    
+    situacao = linha[&#39;situacao_data_entrega&#39;]
+</code></pre>
 </div>
 <div id="conversão-de-datas" class="section level3">
 <h3>4. Conversão de datas</h3>
@@ -530,6 +576,17 @@ do dataset de pedidos, converte as strings para objetos
 <code>%Y-%m-%d %H:%M:%S</code> e, em seguida, formata as datas para
 <code>%d-%m-%Y</code>. Valores vazios são mantidos como
 <code>None</code>.</p>
+<pre class="python"><code>
+    for linha in dados:
+          for coluna in colunas_data:
+              if linha[coluna] not in (None, &#39;&#39;): # Verifica se a data não está vazia
+                  linha[coluna] = dt.datetime.strptime(
+                      linha[coluna],
+                      &#39;%Y-%m-%d %H:%M:%S&#39;
+                      ).strftime(&#39;%d-%m-%Y&#39;) # Transforma para o formato usado no Brasil conforme 
+              else:
+                  linha[coluna] = None # Se estiver vazia, atribui None
+</code></pre>
 </div>
 </div>
 <div id="resultado-esperado" class="section level2">

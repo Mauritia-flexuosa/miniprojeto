@@ -132,17 +132,88 @@ Para criar um critério mais abrangente (pensando em adição de dados futuros),
 
 Para `product_category_name`, foi adotada uma regra específica de preenchimento dos valores ausentes imposta no desafio: `Sempre que encontrar um valor nulo/vazio na coluna product_category_name, ele deve ser preenchido com a string "sem categoria".`. O código também foi pensado para estender essa estratégia para outras variáveis tratadas como strings, gerando valores no padrão `sem_<categoria>`. Esta iniciativa foi tomada pelo entendimento de que, como são menos de 2% dos dados faltantes para esta variável, o critério poderia ser facilmente aplicado a variáveis de "importância" presumivelmente similares e com o mesmo número de ausências. 
 
+``` python
+strings_prod = [
+      'product_category_name',
+      'product_name_lenght',
+      'product_description_lenght',
+      'product_photos_qty'
+  ]
+  padrao = r'_(.*?)_' # pega a palavrinha entre os underscores (_)
+
+  for linha in dados_limpos:
+    for var in linha:
+      # Se a variável for string e se estiver nessa lista string_Prod
+      if var in strings_prod and type(var) == str:
+        # E se o valor for nulo ou inexistente
+        if linha[var] is None or linha[var] == '':
+          texto = var
+          variavel = re.findall(padrao, texto)[0] # Eu coloquei o '[0]' porque retorna uma lista e nao uma string
+          # Preencha com sem_ e o texto que eu peguei no meio do nome da variável
+          preenchimento = "sem_" + variavel
+          linha[var] = preenchimento
+```
+
 ### 2. Padronização de textos e Regex
 
 A função `limpa_texto()` realiza a padronização de `product_category_name`, removendo espaços excedentes nas extremidades com `.strip()`, convertendo o texto para letras minúsculas com `.lower()` e utilizando uma expressão regular para remover caracteres não alfanuméricos e underscores.
+
+``` python
+for linha in dados:
+      texto = linha['product_category_name']
+      # Verifica se não tem alguma linha sem informaçao
+      if texto is not None:
+          texto = texto.strip().lower() # Remove espaços em braco nas extremidades e transforma tudo para letra minúscula
+      # Removi caracteres não alfa-numéricos e o underscore
+      padrao = r'[^\w\s]+|_'
+      # Substitui os caracteres do 'padrao' e substitui por ' '
+      texto = re.sub(padrao, ' ', texto)
+
+```
+
 
 ### 3. Validação das datas de entrega
 
 A função `situacao_data_entrega()` verifica a relação entre `order_status` e `order_delivered_customer_date`. Para cada pedido, é criada a variável `situacao_data_entrega`, classificando registros como `OK`, `Falta data de entrega`, `OK! Sem data porque não foi entregue` ou `Pedido não entregue com data`. O objetivo é verificar a hipótese de negócio de que pedidos sem data de entrega devem estar associados a pedidos que não foram entregues.
 
+
+``` python
+ for linha in dados:
+
+    total_linhas += 1
+    # Cria uma coluna indicando a situação da data de entrega
+    if linha['order_status'] == 'delivered' and linha['order_delivered_customer_date'] is None:
+      linha['situacao_data_entrega'] = 'Falta data de entrega'
+      print(f'-> Order_id {linha['order_id']} com falta de data de entrega!')
+    if linha['order_status'] != 'delivered' and linha['order_delivered_customer_date'] is None:
+      linha['situacao_data_entrega'] = 'OK! Sem data porque não foi entregue'
+    elif linha['order_status'] != 'delivered' and linha['order_delivered_customer_date'] is not None:
+      linha['situacao_data_entrega'] = 'Pedido não entregue com data'
+      print(f'-> Order_id {linha['order_id']} com data de entrega mas que não foi entregue!')
+    elif linha['order_status'] == 'delivered' and linha['order_delivered_customer_date'] is not None:
+      linha['situacao_data_entrega'] = 'OK'
+    
+    situacao = linha['situacao_data_entrega']
+
+```
+
 ### 4. Conversão de datas
 
-A função `converte_data()` identifica as colunas temporais do dataset de pedidos, converte as strings para objetos `datetime` utilizando o formato original `%Y-%m-%d %H:%M:%S` e, em seguida, formata as datas para `%d-%m-%Y`. Valores vazios são mantidos como `None`.
+A função `converte_data()` identifica as colunas temporais do dataset de pedidos, converte as strings para objetos `datetime` utilizando o formato original `%Y-%m-%d %H:%M:%S` e, em seguida, formata as datas para `%d-%m-%Y` e o formato volta a ser string. Valores vazios são mantidos como `None`.
+
+``` python
+
+    for linha in dados:
+          for coluna in colunas_data:
+              if linha[coluna] not in (None, ''): # Verifica se a data não está vazia
+                  linha[coluna] = dt.datetime.strptime(
+                      linha[coluna],
+                      '%Y-%m-%d %H:%M:%S'
+                      ).strftime('%d-%m-%Y') # Transforma para o formato usado no Brasil conforme 
+              else:
+                  linha[coluna] = None # Se estiver vazia, atribui None
+
+```
 
 ## Resultado esperado
 
