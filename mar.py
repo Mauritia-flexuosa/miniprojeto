@@ -1,7 +1,7 @@
 # Funções criadas
 
 def converte_data(dados):
-
+    import datetime as dt
     """
     Esta função converte a data no formato de string para datetime. Após isso, muda
     o formato da data para o formato usado no brasil ('%d-%m-%Y') e volta a ser uma 
@@ -16,10 +16,10 @@ def converte_data(dados):
           'order_delivered_customer_date',
           'order_estimated_delivery_date'
       ]
-
+    # Verifica se a data de cada linha não está vazia e transforma para o formato brasileiro
     for linha in dados:
           for coluna in colunas_data:
-              if linha[coluna] not in (None, ''): # Verifica se a data não está vazia
+              if linha[coluna] not in (None, ''):
                   linha[coluna] = dt.datetime.strptime(
                       linha[coluna],
                       '%Y-%m-%d %H:%M:%S'
@@ -30,6 +30,7 @@ def converte_data(dados):
 
 
 def limpa_texto(dados):
+  import re
   """
   Esta função limpa o nome da categoria dos produtos em cada linha, ou seja, transforma todas as letras
   em minúsculas, remove espaços nas extremidades do texto e substitui caracteres especiais e o
@@ -91,9 +92,10 @@ def situacao_data_entrega(dados):
 
 
 def limpar_dados_faltantes(dados):
+  import re
   print('=============== Dados originais (sem processamento) ===============\n')
   print('Nome do dataset: olist_products_dataset\n')
-  print(f'Originalmente, os dados possuem {len(dados_prod)} linhas\n')
+  print(f'Originalmente, os dados possuem {len(dados)} linhas\n')
   print('========================================\n')
   print('Quantidade de NAs por variável:\n')
 
@@ -166,12 +168,12 @@ def limpar_dados_faltantes(dados):
           linha[var] = preenchimento
 
   print('\n========================================\n')
-  print(f'Número inicial de linhas: {len(dados_prod)} linhas')
+  print(f'Número inicial de linhas: {len(dados)} linhas')
   print('========================================\n')
   print(f'Foi realizado o preenchimento de {conta_nas['product_category_name']} valores inexistentes.')
-  print(f'\nForam removidas {len(dados_prod)-len(dados_limpos)} linhas após o processamento')
+  print(f'\nForam removidas {len(dados)-len(dados_limpos)} linhas após o processamento')
   print(f'\nNúmero final de linhas: {len(dados_limpos)} linhas')
   print('\n========================================\n')
 
 
-
+    

@@ -11,12 +11,12 @@ import mar as mo
 #print("Path to dataset files:", path)
 
 #with open(path + '/olist_orders_dataset.csv',
-with open('/olist_orders_dataset.csv',
+with open('olist_orders_dataset.csv',
           mode = 'r',
           encoding='utf-8') as arquivo:
     dados = list(csv.DictReader(arquivo))
 
-with open('/olist_products_dataset.csv',
+with open('olist_products_dataset.csv',
           mode = 'r',
           encoding='utf-8') as arquivo:
     dados_prod = list(csv.DictReader(arquivo))
